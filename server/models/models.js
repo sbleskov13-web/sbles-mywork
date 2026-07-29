@@ -147,47 +147,97 @@ const SubscriptionInfo = sequelize.define("subscription_info", {
 
 // ====================== RELATIONS ======================
 
-// User -> Builder
+// ---------- User ----------
 
-User.hasOne(Builder);
-Builder.belongsTo(User);
+User.hasOne(Builder, {
+    foreignKey: "userId",
+    as: "builder",
+});
 
-// User -> Channels
+Builder.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
 
-User.hasMany(Channel);
-Channel.belongsTo(User);
+User.hasMany(Channel, {
+    foreignKey: "userId",
+    as: "channels",
+});
 
-// Type -> Channels
+Channel.belongsTo(User, {
+    foreignKey: "userId",
+    as: "user",
+});
 
-Type.hasMany(Channel);
-Channel.belongsTo(Type);
+// ---------- Subscription Type ----------
 
-// Builder -> BuilderSubscription
+SubscriptionType.hasMany(Channel, {
+    foreignKey: "subscriptionTypeId",
+    as: "channels",
+});
 
-Builder.hasMany(BuilderSubscription);
-BuilderSubscription.belongsTo(Builder);
+Channel.belongsTo(SubscriptionType, {
+    foreignKey: "subscriptionTypeId",
+    as: "subscriptionType",
+});
 
-// Subscription -> BuilderSubscription
+// ---------- Builder ----------
 
-Subscription.hasMany(BuilderSubscription);
-BuilderSubscription.belongsTo(Subscription);
+Builder.hasMany(BuilderSubscription, {
+    foreignKey: "builderId",
+    as: "subscriptions",
+});
 
-// Type -> Subscription
+BuilderSubscription.belongsTo(Builder, {
+    foreignKey: "builderId",
+    as: "builder",
+});
 
-Type.hasMany(Subscription);
-Subscription.belongsTo(Type);
+// ---------- Subscription Plan ----------
 
-// Rate -> Subscription
+SubscriptionType.hasMany(SubscriptionPlan, {
+    foreignKey: "subscriptionTypeId",
+    as: "subscriptionPlans",
+});
 
-Rate.hasMany(Subscription);
-Subscription.belongsTo(Rate);
+SubscriptionPlan.belongsTo(SubscriptionType, {
+    foreignKey: "subscriptionTypeId",
+    as: "subscriptionType",
+});
 
-// Subscription -> SubscriptionInfo
+Rate.hasMany(SubscriptionPlan, {
+    foreignKey: "rateId",
+    as: "subscriptionPlans",
+});
 
-Subscription.hasMany(SubscriptionInfo, {
+SubscriptionPlan.belongsTo(Rate, {
+    foreignKey: "rateId",
+    as: "rate",
+});
+
+// ---------- Builder Subscription ----------
+
+SubscriptionPlan.hasMany(BuilderSubscription, {
+    foreignKey: "subscriptionPlanId",
+    as: "builderSubscriptions",
+});
+
+BuilderSubscription.belongsTo(SubscriptionPlan, {
+    foreignKey: "subscriptionPlanId",
+    as: "subscriptionPlan",
+});
+
+// ---------- Subscription Info ----------
+
+SubscriptionPlan.hasMany(SubscriptionInfo, {
+    foreignKey: "subscriptionPlanId",
     as: "info",
 });
-SubscriptionInfo.belongsTo(Subscription);
+
+SubscriptionInfo.belongsTo(SubscriptionPlan, {
+    foreignKey: "subscriptionPlanId",
+    as: "subscriptionPlan",
+});
 
 module.exports = {
     User,
